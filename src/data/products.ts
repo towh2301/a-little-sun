@@ -15,6 +15,14 @@ import imgHoaOaiHuong from '../assets/images/product_hoa_oai_huong_1790413575846
 // Newly generated hero & variant images for Tiểu Ếch Xanh
 import imgEchHero from '../assets/images/tieu_ech_xanh_hero_1790415262412.jpg';
 import imgEchVariants from '../assets/images/tieu_ech_variants_1790415280155.jpg';
+import imgEchFront from '../assets/images/ech_front_1790415849738.jpg';
+import imgEchBack from '../assets/images/ech_back_1790415864496.jpg';
+import imgEchLeft from '../assets/images/ech_left_1790415878995.jpg';
+import imgEchTop from '../assets/images/ech_top_bottom_1790415895029.jpg';
+import imgEchHatYellow from '../assets/images/ech_hat_yellow_1790416514223.jpg';
+import imgEchFlowerHold from '../assets/images/ech_flower_hold_1790416537681.jpg';
+import imgEchRaincoat from '../assets/images/ech_raincoat_1790416551727.jpg';
+import imgEchSleeping from '../assets/images/ech_sleeping_1790416566905.jpg';
 
 export const PRODUCTS: Product[] = [
   // 1. TIỂU ẾCH XANH (Sản phẩm tiêu biểu đặc biệt với đầy đủ thông tin chuẩn infographic scrapbook)
@@ -50,11 +58,11 @@ Vì thế, Ếch luôn mang theo chiếc ba lô nhỏ, dù đi đâu cũng khôn
       { part: 'Mắt hạt tròn', colorName: 'Đen láy', hex: '#2A2927' },
     ],
     angles: [
-      { label: 'Mặt trước', image: imgEchHero },
-      { label: 'Mặt sau (Ba lô)', image: imgEchHero },
-      { label: 'Bên trái', image: imgEchHero },
+      { label: 'Mặt trước', image: imgEchFront },
+      { label: 'Mặt sau', image: imgEchBack },
+      { label: 'Bên trái', image: imgEchLeft },
       { label: 'Bên phải', image: imgEchHero },
-      { label: 'Mặt trên', image: imgEchHero },
+      { label: 'Mặt trên', image: imgEchTop },
       { label: 'Mặt dưới', image: imgEchHero },
     ],
     usageIdeas: [
@@ -75,28 +83,28 @@ Vì thế, Ếch luôn mang theo chiếc ba lô nhỏ, dù đi đâu cũng khôn
         id: 'ech-doi-mu',
         name: 'Ếch Đội Mũ Vàng',
         tagline: 'Bé du lịch khám phá khắp thế giới',
-        image: imgEchVariants,
+        image: imgEchHatYellow,
         priceDelta: 5000,
       },
       {
         id: 'ech-cam-hoa',
         name: 'Ếch Cầm Nụ Hoa',
         tagline: 'Gửi tặng người thương những điều dịu dàng nhất',
-        image: imgEchVariants,
+        image: imgEchFlowerHold,
         priceDelta: 5000,
       },
       {
         id: 'ech-ao-mua',
         name: 'Ếch Mặc Áo Mưa Vàng',
         tagline: 'Bảo bối cho những ngày mưa rào rả rích',
-        image: imgEchVariants,
+        image: imgEchRaincoat,
         priceDelta: 7000,
       },
       {
         id: 'ech-ngu',
         name: 'Ếch Ngủ Say (Ôm Gối Mây)',
         tagline: 'Nhắc nhở bạn nghỉ ngơi sau ngày dài mệt mỏi zzz',
-        image: imgEchVariants,
+        image: imgEchSleeping,
         priceDelta: 5000,
       },
     ],

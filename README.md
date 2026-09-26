@@ -50,6 +50,35 @@
 
 ---
 
+## 🔐 Đường dẫn & Hướng dẫn Cổng Quản Trị Chủ Tiệm (Admin Portal)
+
+Hệ thống được thiết kế **tách biệt hoàn toàn** giữa Website khách hàng và Trang quản trị của chủ tiệm. Khách hàng thông thường sẽ không nhìn thấy bất kỳ nút truy cập hay thông tin quản trị nào.
+
+### 1. Đường dẫn truy cập trang Admin:
+* **Cách 1 (Trực tiếp qua URL):** Thêm `#admin` vào cuối link website:
+  * Ví dụ Local: `http://localhost:3000/#admin`
+  * Hoặc trên link triển khai: `https://[dia-chi-web-cua-ban]/#admin`
+* **Cách 2 (Lối đi bí mật):** Nhấp vào dòng chữ nhỏ kín đáo `(Góc chủ tiệm)` ở cuối chân trang Footer.
+
+### 2. Thông tin xác thực (Admin Credentials):
+Khi vào `#admin`, hệ thống sẽ yêu cầu mật khẩu quản trị bảo mật:
+* **Mật khẩu quản trị mặc định:** `123456` hoặc `motchutnang2026`
+* Có nút **"Khóa trang"** (Đăng xuất) để bảo vệ dữ liệu khi rời máy.
+
+### 3. Các tính năng quản trị:
+* **Quản lý Đơn hàng:** Xem thông tin khách, số điện thoại, địa chỉ nhận hàng, số lượng và màu sắc bạn nhỏ đã đặt.
+* **Đọc lời nhắn thiệp viết tay (💌):** Xem lời nhắn khách gửi gắm để chép vào thiệp giấy kraft kèm theo đơn.
+* **Cập nhật trạng thái đơn:** `Chờ xử lý` $\rightarrow$ `Đang gói quà` $\rightarrow$ `Đang giao bưu cục` $\rightarrow$ `Đã xong` $\rightarrow$ `Huỷ đơn`.
+* **Quản lý kho nhanh:** Nút `Kho` để cập nhật số lượng móc sẵn ngay tại bảng danh sách.
+* **Tạo & Chỉnh sửa sản phẩm ĐẦY ĐỦ (Full Scrapbook Form):**
+  * **Tab 1 — Cơ bản & Giá:** Tên bạn nhỏ, phụ đề (subtitle), giá tiền, phân loại, tem nổi bật, màu sắc chủ đạo, kích thước đo bằng thước kẻ (cao x ngang).
+  * **Tab 2 — Hình ảnh & 6 Góc nhìn (Angles):** Tải ảnh trực tiếp từ máy tính lên hoặc dán URL cho ảnh đại diện chính và từng góc chụp (Mặt trước, Mặt sau, Bên trái, Bên phải, Mặt trên, Mặt dưới).
+  * **Tab 3 — Bảng màu & Các phiên bản (Variants):** Bảng chấm màu chi tiết (Da, má hồng, balo, mắt, hoa...) và các biến thể phụ kiện (Đội mũ, Cầm hoa, Áo mưa, Ngủ ôm gối...).
+  * **Tab 4 — Câu chuyện & Ứng dụng:** Câu chuyện tự sự ấm áp (Storytelling), trích dẫn câu nói (Story quote), lưu ý đóng gói quà, ý tưởng sử dụng (móc khóa, bàn học...) và nhãn cảm xúc.
+* **Xoá sản phẩm:** Nút xoá kèm hộp thoại xác nhận an toàn.
+
+---
+
 ## 🛠️ Công nghệ sử dụng
 
 - **Frontend:** React 19, TypeScript

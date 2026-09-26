@@ -114,6 +114,12 @@ export const BackendStore = {
     return list;
   },
 
+  deleteProduct(productId: string) {
+    const list = this.getProducts().filter((p) => p.id !== productId);
+    this.saveProducts(list);
+    return list;
+  },
+
   getOrders(): OrderInfo[] {
     try {
       const stored = localStorage.getItem(ORDERS_KEY);

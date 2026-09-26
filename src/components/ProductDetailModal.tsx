@@ -23,6 +23,7 @@ export const ProductDetailModal: React.FC = () => {
   const [currentProduct, setCurrentProduct] = useState<Product | null>(null);
   const [selectedColor, setSelectedColor] = useState<string>('');
   const [selectedVariant, setSelectedVariant] = useState<ProductVariantEdition | null>(null);
+  const [activeAngleIndex, setActiveAngleIndex] = useState<number>(0);
   const [quantity, setQuantity] = useState(1);
   const [justAdded, setJustAdded] = useState(false);
   const [activeTab, setActiveTab] = useState<'story' | 'materials' | 'variants' | 'usage'>('story');
@@ -31,6 +32,7 @@ export const ProductDetailModal: React.FC = () => {
     if (selectedProductForDetail) {
       setCurrentProduct(selectedProductForDetail);
       setSelectedColor(selectedProductForDetail.color);
+      setActiveAngleIndex(0);
       if (selectedProductForDetail.variants && selectedProductForDetail.variants.length > 0) {
         setSelectedVariant(selectedProductForDetail.variants[0]);
       } else {
@@ -55,6 +57,7 @@ export const ProductDetailModal: React.FC = () => {
   const handleSelectProduct = (prod: Product) => {
     setCurrentProduct(prod);
     setSelectedColor(prod.color);
+    setActiveAngleIndex(0);
     if (prod.variants && prod.variants.length > 0) {
       setSelectedVariant(prod.variants[0]);
     } else {
@@ -133,40 +136,73 @@ export const ProductDetailModal: React.FC = () => {
               <div className="relative aspect-square w-full rounded-2xl md:rounded-3xl overflow-hidden bg-[#F5EEDF] border-2 border-[#987456]/20 shadow-md group">
                 <img
                   src={selectedVariant?.image || currentProduct.image}
-                  alt={currentProduct.name}
-                  className="w-full h-full object-cover object-center group-hover:scale-103 transition-transform duration-500"
+                  alt={selectedVariant ? `${currentProduct.name} - ${selectedVariant.name}` : currentProduct.name}
+                  className="w-full h-full object-cover object-center group-hover:scale-103 transition-all duration-300"
                   referrerPolicy="no-referrer"
                 />
                 
                 {/* Vintage Scrapbook Stamp Tag */}
                 <div className="absolute top-3 left-3 bg-[#FFF9EF]/95 backdrop-blur-xs px-3 py-1 rounded-full border border-[#987456]/20 text-xs font-semibold text-[#4D4A3F] flex items-center gap-1.5 shadow-2xs">
                   <span>🍃</span>
-                  <span>Móc thủ công 100%</span>
+                  <span>
+                    {selectedVariant ? selectedVariant.name : 'Móc thủ công 100%'}
+                  </span>
                 </div>
 
                 {/* Subtitle tag */}
                 <div className="absolute bottom-3 left-3 right-3 bg-[#4D4A3F]/85 backdrop-blur-xs px-3 py-1.5 rounded-xl text-white text-[11px] text-center italic">
-                  “{currentProduct.storyQuote || 'Nhỏ xinh, dễ thương, mang theo cả niềm vui'}”
+                  “{selectedVariant?.tagline || currentProduct.storyQuote || 'Nhỏ xinh, dễ thương, mang theo cả niềm vui'}”
                 </div>
               </div>
 
-              {/* Angle thumbnails if available */}
-              {currentProduct.angles && currentProduct.angles.length > 0 && (
+              {/* Thumbnails of other variants if available */}
+              {currentProduct.variants && currentProduct.variants.length > 1 && (
                 <div>
-                  <p className="text-[11px] font-bold text-[#987456] uppercase tracking-wider mb-1.5">
-                    Các góc nhìn thành phẩm:
-                  </p>
-                  <div className="grid grid-cols-6 gap-1.5 text-center">
-                    {currentProduct.angles.map((ang, i) => (
-                      <div key={i} className="flex flex-col items-center">
-                        <div className="w-full aspect-square rounded-lg border border-[#987456]/20 overflow-hidden bg-white p-0.5">
-                          <img src={ang.image} alt={ang.label} className="w-full h-full object-cover rounded-md" />
-                        </div>
-                        <span className="text-[9px] text-[#4D4A3F] mt-0.5 font-medium truncate w-full">
-                          {ang.label}
-                        </span>
-                      </div>
-                    ))}
+                  <div className="flex items-center justify-between mb-1.5">
+                    <p className="text-[11px] font-bold text-[#987456] uppercase tracking-wider">
+                      Các phiên bản sưu tầm:
+                    </p>
+                    <span className="text-[10px] text-[#7A8B70] italic">
+                      (Bấm để đổi ảnh)
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-4 sm:grid-cols-5 gap-2 text-center">
+                    {currentProduct.variants.map((v) => {
+                      const isVarActive = selectedVariant?.id === v.id;
+                      return (
+                        <button
+                          key={v.id}
+                          type="button"
+                          onClick={() => setSelectedVariant(v)}
+                          className={`flex flex-col items-center group cursor-pointer focus:outline-none transition-all ${
+                            isVarActive ? 'scale-105' : 'opacity-70 hover:opacity-100'
+                          }`}
+                        >
+                          <div
+                            className={`w-full aspect-square rounded-xl border overflow-hidden p-0.5 transition-all ${
+                              isVarActive
+                                ? 'border-[#7A8B70] ring-2 ring-[#7A8B70]/40 shadow-xs bg-[#7A8B70]/10'
+                                : 'border-[#987456]/20 bg-white group-hover:border-[#7A8B70]/50'
+                            }`}
+                          >
+                            <img
+                              src={v.image || currentProduct.image}
+                              alt={v.name}
+                              className="w-full h-full object-cover rounded-lg"
+                            />
+                          </div>
+                          <span
+                            className={`text-[9px] mt-1 font-medium truncate w-full leading-tight transition-colors ${
+                              isVarActive
+                                ? 'text-[#53634E] font-bold'
+                                : 'text-[#4D4A3F] group-hover:text-[#53634E]'
+                            }`}
+                          >
+                            {v.name.replace('Tiểu Ếch ', '').replace('Ếch ', '')}
+                          </span>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               )}

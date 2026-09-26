@@ -16,11 +16,14 @@ import {
   LogOut,
   TrendingUp,
   FileText,
-  AlertCircle
+  AlertCircle,
+  Trash2,
+  Settings
 } from 'lucide-react';
 import { Product, OrderInfo } from '../types';
 import { BackendStore } from '../services/backendStore';
 import { formatVND } from '../data/products';
+import { ProductFormModal } from './ProductFormModal';
 
 interface AdminDashboardProps {
   onBackToShop: () => void;
@@ -44,15 +47,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToShop }) 
   const [editingStockId, setEditingStockId] = useState<string | null>(null);
   const [tempStockValue, setTempStockValue] = useState<number>(0);
 
-  // New product modal state
-  const [isAddProductOpen, setIsAddProductOpen] = useState(false);
-  const [newProdName, setNewProdName] = useState('');
-  const [newProdPrice, setNewProdPrice] = useState(49000);
-  const [newProdColor, setNewProdColor] = useState('Xanh Rêu');
-  const [newProdCategory, setNewProdCategory] = useState('mam');
-  const [newProdStock, setNewProdStock] = useState(10);
-  const [newProdQuote, setNewProdQuote] = useState('');
-  const [newProdDesc, setNewProdDesc] = useState('');
+  // Full product form modal state (Add / Edit)
+  const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+  const [productToEdit, setProductToEdit] = useState<Product | null>(null);
 
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
@@ -127,38 +124,28 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToShop }) 
     refreshData();
   };
 
-  const handleAddNewProduct = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newProdName.trim()) return;
+  const [productToDelete, setProductToDelete] = useState<{ id: string; name: string } | null>(null);
 
-    // Default pleasant image from existing collection
-    const sampleImg = products[0]?.image || '';
-    const newProduct: Product = {
-      id: `mcn-${Date.now()}`,
-      name: newProdName.trim(),
-      price: Number(newProdPrice),
-      color: newProdColor,
-      colorHex: '#7A8B70',
-      category: newProdCategory,
-      type: newProdCategory as any,
-      description: newProdDesc || 'Món quà len thủ công được tỉ mỉ móc từng sợi, đong đầy ấm áp.',
-      image: sampleImg,
-      size: 'Khoảng 5–6cm',
-      material: 'Len cotton cao cấp',
-      stock: Number(newProdStock),
-      highlightText: 'Mới ra mắt',
-      packagingNote: 'Đóng gói cùng thiệp chữ viết tay & hoa khô',
-      storyQuote: newProdQuote || 'Một chút dịu dàng cho ngày bình yên',
-    };
+  const handleOpenCreate = () => {
+    setProductToEdit(null);
+    setIsProductModalOpen(true);
+  };
 
-    BackendStore.addProduct(newProduct);
-    refreshData();
-    setIsAddProductOpen(false);
-    // Reset form
-    setNewProdName('');
-    setNewProdPrice(49000);
-    setNewProdQuote('');
-    setNewProdDesc('');
+  const handleOpenEdit = (prod: Product) => {
+    setProductToEdit(prod);
+    setIsProductModalOpen(true);
+  };
+
+  const handleDeleteProduct = (productId: string, productName: string) => {
+    setProductToDelete({ id: productId, name: productName });
+  };
+
+  const confirmDeleteProduct = () => {
+    if (productToDelete) {
+      BackendStore.deleteProduct(productToDelete.id);
+      refreshData();
+      setProductToDelete(null);
+    }
   };
 
   // Metrics
@@ -396,7 +383,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToShop }) 
 
           {activeTab === 'products' && (
             <button
-              onClick={() => setIsAddProductOpen(true)}
+              onClick={handleOpenCreate}
               className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-[#7A8B70] hover:bg-[#687860] text-white shadow-xs transition-all cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" />
@@ -612,18 +599,38 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToShop }) 
                             “{p.storyQuote || p.description}”
                           </td>
                           <td className="py-3 px-4 text-right">
-                            {!isEditing && (
+                            <div className="flex items-center justify-end gap-1.5">
+                              {!isEditing ? (
+                                <button
+                                  onClick={() => {
+                                    setEditingStockId(p.id);
+                                    setTempStockValue(p.stock);
+                                  }}
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs bg-[#EFE7D5] hover:bg-[#E2D8C0] text-[#4D4A3F] border border-[#987456]/15 transition-all cursor-pointer"
+                                  title="Chỉnh nhanh số lượng kho"
+                                >
+                                  <Edit3 className="w-3 h-3" />
+                                  <span>Kho</span>
+                                </button>
+                              ) : null}
+
                               <button
-                                onClick={() => {
-                                  setEditingStockId(p.id);
-                                  setTempStockValue(p.stock);
-                                }}
-                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs bg-[#EFE7D5] hover:bg-[#E2D8C0] text-[#4D4A3F] border border-[#987456]/15 transition-all cursor-pointer"
+                                onClick={() => handleOpenEdit(p)}
+                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs bg-[#7A8B70]/15 hover:bg-[#7A8B70]/25 text-[#53634E] border border-[#7A8B70]/25 transition-all cursor-pointer font-medium"
+                                title="Chỉnh sửa toàn bộ thông tin (Ảnh, 6 góc nhìn, bảng màu, câu chuyện...)"
                               >
-                                <Edit3 className="w-3 h-3" />
-                                <span>Sửa kho</span>
+                                <Settings className="w-3 h-3" />
+                                <span>Sửa đầy đủ</span>
                               </button>
-                            )}
+
+                              <button
+                                onClick={() => handleDeleteProduct(p.id, p.name)}
+                                className="p-1 rounded-lg text-[#987456] hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                                title="Xoá bạn nhỏ khỏi tiệm"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       );
@@ -636,123 +643,43 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBackToShop }) 
         )}
       </div>
 
-      {/* Modal: Thêm bạn nhỏ mới */}
-      {isAddProductOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
-          <div className="bg-[#FFF9EF] w-full max-w-lg rounded-3xl border border-[#987456]/20 shadow-2xl p-6 relative">
-            <div className="flex items-center justify-between pb-3 border-b border-[#987456]/15 mb-4">
-              <h3 className="font-serif-soft font-bold text-lg text-[#4D4A3F]">
-                Thêm một bạn nhỏ mới vào tiệm
+      {/* Modal: Thêm / Sửa bạn nhỏ với ĐẦY ĐỦ thuộc tính Scrapbook */}
+      <ProductFormModal
+        isOpen={isProductModalOpen}
+        onClose={() => setIsProductModalOpen(false)}
+        onSuccess={refreshData}
+        productToEdit={productToEdit}
+      />
+
+      {/* Confirmation Dialog for Delete */}
+      {productToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div className="bg-[#FFF9EF] w-full max-w-sm rounded-3xl border border-[#987456]/20 p-6 text-center space-y-4 shadow-xl">
+            <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mx-auto">
+              <Trash2 className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="font-serif-soft font-bold text-base text-[#4D4A3F]">
+                Xác nhận xoá bạn nhỏ?
               </h3>
+              <p className="text-xs text-[#987456] mt-1">
+                Bạn có chắc muốn xoá <strong className="text-[#4D4A3F]">"{productToDelete.name}"</strong> khỏi cửa hàng không? Thao tác này không thể hoàn tác.
+              </p>
+            </div>
+            <div className="flex items-center justify-center gap-2 pt-2">
               <button
-                onClick={() => setIsAddProductOpen(false)}
-                className="w-7 h-7 rounded-full bg-[#EFE7D5] flex items-center justify-center text-[#4D4A3F] hover:bg-white cursor-pointer"
+                onClick={() => setProductToDelete(null)}
+                className="flex-1 py-2 rounded-xl bg-[#EFE7D5] hover:bg-[#E2D8C0] text-[#4D4A3F] font-semibold text-xs cursor-pointer"
               >
-                <X className="w-4 h-4" />
+                Giữ lại
+              </button>
+              <button
+                onClick={confirmDeleteProduct}
+                className="flex-1 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs cursor-pointer shadow-xs"
+              >
+                Xác nhận xoá
               </button>
             </div>
-
-            <form onSubmit={handleAddNewProduct} className="space-y-3.5 text-xs">
-              <div>
-                <label className="block font-semibold text-[#4D4A3F] mb-1">
-                  Tên bạn nhỏ len *
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Ví dụ: Bạn Tulip Hồng Mini"
-                  value={newProdName}
-                  onChange={(e) => setNewProdName(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-white border border-[#987456]/20 focus:outline-none focus:border-[#7A8B70]"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-semibold text-[#4D4A3F] mb-1">
-                    Giá bán (VNĐ) *
-                  </label>
-                  <input
-                    type="number"
-                    required
-                    value={newProdPrice}
-                    onChange={(e) => setNewProdPrice(Number(e.target.value))}
-                    className="w-full px-3 py-2 rounded-xl bg-white border border-[#987456]/20 focus:outline-none focus:border-[#7A8B70]"
-                  />
-                </div>
-                <div>
-                  <label className="block font-semibold text-[#4D4A3F] mb-1">
-                    Số lượng móc sẵn (Tồn kho) *
-                  </label>
-                  <input
-                    type="number"
-                    required
-                    min={1}
-                    value={newProdStock}
-                    onChange={(e) => setNewProdStock(Number(e.target.value))}
-                    className="w-full px-3 py-2 rounded-xl bg-white border border-[#987456]/20 focus:outline-none focus:border-[#7A8B70]"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-semibold text-[#4D4A3F] mb-1">
-                    Phân loại
-                  </label>
-                  <select
-                    value={newProdCategory}
-                    onChange={(e) => setNewProdCategory(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-white border border-[#987456]/20 focus:outline-none cursor-pointer"
-                  >
-                    <option value="mam">Mầm cây</option>
-                    <option value="hoa">Hoa cỏ</option>
-                    <option value="qua">Quả ngọt & Nấm</option>
-                    <option value="phukien">Phụ kiện</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block font-semibold text-[#4D4A3F] mb-1">
-                    Màu len chủ đạo
-                  </label>
-                  <input
-                    type="text"
-                    value={newProdColor}
-                    onChange={(e) => setNewProdColor(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-white border border-[#987456]/20 focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block font-semibold text-[#4D4A3F] mb-1">
-                  Lời nhắn gửi gắm (Story quote)
-                </label>
-                <input
-                  type="text"
-                  placeholder="Ví dụ: Giữ lại chút nắng cho một ngày nhiều mây..."
-                  value={newProdQuote}
-                  onChange={(e) => setNewProdQuote(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-white border border-[#987456]/20 focus:outline-none"
-                />
-              </div>
-
-              <div className="pt-3 flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setIsAddProductOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-[#EFE7D5] text-[#4D4A3F] hover:bg-[#E2D8C0] cursor-pointer"
-                >
-                  Huỷ bỏ
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 rounded-xl bg-[#7A8B70] text-white font-semibold hover:bg-[#687860] shadow-xs cursor-pointer"
-                >
-                  Tạo bạn nhỏ mới
-                </button>
-              </div>
-            </form>
           </div>
         </div>
       )}
