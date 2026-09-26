@@ -135,8 +135,16 @@ export const ProductDetailModal: React.FC = () => {
             <div className="md:col-span-5 space-y-3">
               <div className="relative aspect-square w-full rounded-2xl md:rounded-3xl overflow-hidden bg-[#F5EEDF] border-2 border-[#987456]/20 shadow-md group">
                 <img
-                  src={selectedVariant?.image || currentProduct.image}
-                  alt={selectedVariant ? `${currentProduct.name} - ${selectedVariant.name}` : currentProduct.name}
+                  src={
+                    currentProduct.angles && currentProduct.angles[activeAngleIndex]
+                      ? currentProduct.angles[activeAngleIndex].image
+                      : selectedVariant?.image || currentProduct.image
+                  }
+                  alt={
+                    currentProduct.angles && currentProduct.angles[activeAngleIndex]
+                      ? `${currentProduct.name} - ${currentProduct.angles[activeAngleIndex].label}`
+                      : currentProduct.name
+                  }
                   className="w-full h-full object-cover object-center group-hover:scale-103 transition-all duration-300"
                   referrerPolicy="no-referrer"
                 />
@@ -145,60 +153,62 @@ export const ProductDetailModal: React.FC = () => {
                 <div className="absolute top-3 left-3 bg-[#FFF9EF]/95 backdrop-blur-xs px-3 py-1 rounded-full border border-[#987456]/20 text-xs font-semibold text-[#4D4A3F] flex items-center gap-1.5 shadow-2xs">
                   <span>🍃</span>
                   <span>
-                    {selectedVariant ? selectedVariant.name : 'Móc thủ công 100%'}
+                    {currentProduct.angles && currentProduct.angles[activeAngleIndex]
+                      ? currentProduct.angles[activeAngleIndex].label
+                      : 'Móc thủ công 100%'}
                   </span>
                 </div>
 
                 {/* Subtitle tag */}
                 <div className="absolute bottom-3 left-3 right-3 bg-[#4D4A3F]/85 backdrop-blur-xs px-3 py-1.5 rounded-xl text-white text-[11px] text-center italic">
-                  “{selectedVariant?.tagline || currentProduct.storyQuote || 'Nhỏ xinh, dễ thương, mang theo cả niềm vui'}”
+                  “{currentProduct.storyQuote || 'Nhỏ xinh, dễ thương, mang theo cả niềm vui'}”
                 </div>
               </div>
 
-              {/* Thumbnails of other variants if available */}
-              {currentProduct.variants && currentProduct.variants.length > 1 && (
+              {/* Angle thumbnails if available */}
+              {currentProduct.angles && currentProduct.angles.length > 0 && (
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
                     <p className="text-[11px] font-bold text-[#987456] uppercase tracking-wider">
-                      Các phiên bản sưu tầm:
+                      Các góc nhìn thành phẩm:
                     </p>
                     <span className="text-[10px] text-[#7A8B70] italic">
-                      (Bấm để đổi ảnh)
+                      (Bấm góc để xem ảnh lớn)
                     </span>
                   </div>
-                  <div className="grid grid-cols-4 sm:grid-cols-5 gap-2 text-center">
-                    {currentProduct.variants.map((v) => {
-                      const isVarActive = selectedVariant?.id === v.id;
+                  <div className="grid grid-cols-6 gap-1.5 text-center">
+                    {currentProduct.angles.map((ang, i) => {
+                      const isAngleActive = activeAngleIndex === i;
                       return (
                         <button
-                          key={v.id}
+                          key={i}
                           type="button"
-                          onClick={() => setSelectedVariant(v)}
+                          onClick={() => setActiveAngleIndex(i)}
                           className={`flex flex-col items-center group cursor-pointer focus:outline-none transition-all ${
-                            isVarActive ? 'scale-105' : 'opacity-70 hover:opacity-100'
+                            isAngleActive ? 'scale-105' : 'opacity-70 hover:opacity-100'
                           }`}
                         >
                           <div
-                            className={`w-full aspect-square rounded-xl border overflow-hidden p-0.5 transition-all ${
-                              isVarActive
+                            className={`w-full aspect-square rounded-lg border overflow-hidden p-0.5 transition-all ${
+                              isAngleActive
                                 ? 'border-[#7A8B70] ring-2 ring-[#7A8B70]/40 shadow-xs bg-[#7A8B70]/10'
                                 : 'border-[#987456]/20 bg-white group-hover:border-[#7A8B70]/50'
                             }`}
                           >
                             <img
-                              src={v.image || currentProduct.image}
-                              alt={v.name}
-                              className="w-full h-full object-cover rounded-lg"
+                              src={ang.image}
+                              alt={ang.label}
+                              className="w-full h-full object-cover rounded-md"
                             />
                           </div>
                           <span
                             className={`text-[9px] mt-1 font-medium truncate w-full leading-tight transition-colors ${
-                              isVarActive
+                              isAngleActive
                                 ? 'text-[#53634E] font-bold'
                                 : 'text-[#4D4A3F] group-hover:text-[#53634E]'
                             }`}
                           >
-                            {v.name.replace('Tiểu Ếch ', '').replace('Ếch ', '')}
+                            {ang.label}
                           </span>
                         </button>
                       );

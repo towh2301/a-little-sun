@@ -31,142 +31,75 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
   const isEditMode = !!productToEdit;
 
   // Basic Info
-  const [name, setName] = useState('');
-  const [subtitle, setSubtitle] = useState('');
-  const [price, setPrice] = useState<number>(49000);
-  const [stock, setStock] = useState<number>(12);
-  const [category, setCategory] = useState<string>('mam');
-  const [highlightText, setHighlightText] = useState('');
+  const [name, setName] = useState(productToEdit?.name || '');
+  const [subtitle, setSubtitle] = useState(productToEdit?.subtitle || '');
+  const [price, setPrice] = useState<number>(productToEdit?.price || 49000);
+  const [stock, setStock] = useState<number>(productToEdit?.stock || 12);
+  const [category, setCategory] = useState<string>(productToEdit?.category || 'mam');
+  const [highlightText, setHighlightText] = useState(productToEdit?.highlightText || '');
   
   // Colors & Material
-  const [color, setColor] = useState('Xanh Lá Mạ');
-  const [colorHex, setColorHex] = useState('#88B868');
+  const [color, setColor] = useState(productToEdit?.color || 'Xanh Lá Mạ');
+  const [colorHex, setColorHex] = useState(productToEdit?.colorHex || '#88B868');
   const [material, setMaterial] = useState(
-    'Len sợi cotton mềm mịn tự nhiên không xù lông'
+    productToEdit?.material || 'Len sợi cotton mềm mịn tự nhiên không xù lông'
   );
 
   // Story & Description
-  const [description, setDescription] = useState('');
-  const [story, setStory] = useState('');
-  const [storyQuote, setStoryQuote] = useState('');
+  const [description, setDescription] = useState(productToEdit?.description || '');
+  const [story, setStory] = useState(productToEdit?.story || '');
+  const [storyQuote, setStoryQuote] = useState(productToEdit?.storyQuote || '');
   const [packagingNote, setPackagingNote] = useState(
-    'Đóng gói trong hộp kraft thắt nơ & thiệp viết tay'
+    productToEdit?.packagingNote || 'Đóng gói trong hộp kraft thắt nơ & thiệp viết tay'
   );
 
   // Dimensions
-  const [height, setHeight] = useState('4 ~ 5 cm');
-  const [width, setWidth] = useState('3 ~ 4 cm');
-  const [sizeNote, setSizeNote] = useState('(Chưa tính móc khoá)');
+  const [height, setHeight] = useState(productToEdit?.sizeDimension?.height || '4 ~ 5 cm');
+  const [width, setWidth] = useState(productToEdit?.sizeDimension?.width || '3 ~ 4 cm');
+  const [sizeNote, setSizeNote] = useState(productToEdit?.sizeDimension?.note || '(Chưa tính móc khoá)');
 
   // Main Image (URL or uploaded file)
-  const [mainImage, setMainImage] = useState<string>('');
+  const [mainImage, setMainImage] = useState<string>(productToEdit?.image || '');
+
+  // Scrapbook Angles (Mặt trước, mặt sau...)
+  const [angles, setAngles] = useState<ProductAngle[]>(
+    productToEdit?.angles || [
+      { label: 'Mặt trước', image: '' },
+      { label: 'Mặt sau', image: '' },
+      { label: 'Bên trái', image: '' },
+      { label: 'Bên phải', image: '' },
+    ]
+  );
 
   // Materials & Colors breakdown (e.g. Da ếch, Balo...)
-  const [materialsList, setMaterialsList] = useState<MaterialColorItem[]>([
-    { part: 'Màu chính', colorName: 'Xanh Lá', hex: '#88B868' },
-    { part: 'Màu phụ', colorName: 'Trắng Kem', hex: '#F4EFEA' },
-  ]);
+  const [materialsList, setMaterialsList] = useState<MaterialColorItem[]>(
+    productToEdit?.materialsList || [
+      { part: 'Màu chính', colorName: 'Xanh Lá', hex: '#88B868' },
+      { part: 'Màu phụ', colorName: 'Trắng Kem', hex: '#F4EFEA' },
+    ]
+  );
 
-  // Variant editions (Ếch đội mũ, Ếch cầm hoa...) with individual images
-  const [variants, setVariants] = useState<ProductVariantEdition[]>([]);
+  // Variant editions (Ếch đội mũ, Ếch cầm hoa...)
+  const [variants, setVariants] = useState<ProductVariantEdition[]>(
+    productToEdit?.variants || []
+  );
 
   // Usage Ideas
-  const [usageIdeas, setUsageIdeas] = useState<string[]>([
-    'Làm móc khóa, treo balo, túi xách',
-    'Trang trí góc bàn học, bàn làm việc',
-    'Làm quà tặng người thân, bạn bè',
-  ]);
+  const [usageIdeas, setUsageIdeas] = useState<string[]>(
+    productToEdit?.usageIdeas || [
+      'Làm móc khóa, treo balo, túi xách',
+      'Trang trí góc bàn học, bàn làm việc',
+      'Làm quà tặng người thân, bạn bè',
+    ]
+  );
 
   // Tags
   const [tagInput, setTagInput] = useState(
-    'Nhỏ xinh nhẹ nhàng, Thân thiện dễ thương, Năng lượng tích cực'
+    productToEdit?.tags ? productToEdit.tags.join(', ') : 'Nhỏ xinh nhẹ nhàng, Thân thiện dễ thương, Năng lượng tích cực'
   );
 
   // Form tab navigation for organized input
-  const [activeTab, setActiveTab] = useState<'basic' | 'images' | 'variants' | 'story'>('basic');
-
-  // CRITICAL: Synchronize state whenever productToEdit or isOpen changes!
-  React.useEffect(() => {
-    if (isOpen) {
-      if (productToEdit) {
-        setName(productToEdit.name || '');
-        setSubtitle(productToEdit.subtitle || '');
-        setPrice(productToEdit.price || 49000);
-        setStock(productToEdit.stock || 12);
-        setCategory(productToEdit.category || 'mam');
-        setHighlightText(productToEdit.highlightText || '');
-        setColor(productToEdit.color || 'Xanh Lá Mạ');
-        setColorHex(productToEdit.colorHex || '#88B868');
-        setMaterial(productToEdit.material || 'Len sợi cotton mềm mịn tự nhiên không xù lông');
-        setDescription(productToEdit.description || '');
-        setStory(productToEdit.story || '');
-        setStoryQuote(productToEdit.storyQuote || '');
-        setPackagingNote(productToEdit.packagingNote || 'Đóng gói trong hộp kraft thắt nơ & thiệp viết tay');
-        setHeight(productToEdit.sizeDimension?.height || '4 ~ 5 cm');
-        setWidth(productToEdit.sizeDimension?.width || '3 ~ 4 cm');
-        setSizeNote(productToEdit.sizeDimension?.note || '(Chưa tính móc khoá)');
-        setMainImage(productToEdit.image || '');
-        setMaterialsList(
-          productToEdit.materialsList && productToEdit.materialsList.length > 0
-            ? productToEdit.materialsList
-            : [
-                { part: 'Màu chính', colorName: 'Xanh Lá', hex: '#88B868' },
-                { part: 'Màu phụ', colorName: 'Trắng Kem', hex: '#F4EFEA' },
-              ]
-        );
-        setVariants(
-          productToEdit.variants && productToEdit.variants.length > 0
-            ? productToEdit.variants
-            : []
-        );
-        setUsageIdeas(
-          productToEdit.usageIdeas && productToEdit.usageIdeas.length > 0
-            ? productToEdit.usageIdeas
-            : [
-                'Làm móc khóa, treo balo, túi xách',
-                'Trang trí góc bàn học, bàn làm việc',
-                'Làm quà tặng người thân, bạn bè',
-              ]
-        );
-        setTagInput(
-          productToEdit.tags && productToEdit.tags.length > 0
-            ? productToEdit.tags.join(', ')
-            : 'Nhỏ xinh nhẹ nhàng, Thân thiện dễ thương, Năng lượng tích cực'
-        );
-      } else {
-        // Reset to clean new product form
-        setName('');
-        setSubtitle('');
-        setPrice(49000);
-        setStock(10);
-        setCategory('mam');
-        setHighlightText('');
-        setColor('Xanh Lá Mạ');
-        setColorHex('#88B868');
-        setMaterial('Len sợi cotton mềm mịn tự nhiên không xù lông');
-        setDescription('');
-        setStory('');
-        setStoryQuote('Mỗi mũi móc là một chút thương gửi trao');
-        setPackagingNote('Đóng gói trong hộp kraft thắt nơ & thiệp viết tay');
-        setHeight('4 ~ 5 cm');
-        setWidth('3 ~ 4 cm');
-        setSizeNote('(Chưa tính móc khoá)');
-        setMainImage('');
-        setMaterialsList([
-          { part: 'Màu chính', colorName: 'Xanh Lá', hex: '#88B868' },
-          { part: 'Màu phụ', colorName: 'Trắng Kem', hex: '#F4EFEA' },
-        ]);
-        setVariants([]);
-        setUsageIdeas([
-          'Làm móc khóa, treo balo, túi xách',
-          'Trang trí góc bàn học, bàn làm việc',
-          'Làm quà tặng người thân, bạn bè',
-        ]);
-        setTagInput('Nhỏ xinh nhẹ nhàng, Thân thiện dễ thương, Năng lượng tích cực');
-      }
-      setActiveTab('basic');
-    }
-  }, [isOpen, productToEdit]);
+  const [activeTab, setActiveTab] = useState<'basic' | 'images_angles' | 'details_variants' | 'story'>('basic');
 
   if (!isOpen) return null;
 
@@ -343,7 +276,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                 : 'bg-[#EFE7D5]/70 text-[#4D4A3F] hover:bg-[#EFE7D5]'
             }`}
           >
-            2. Ảnh đại diện sản phẩm
+            2. Ảnh chính & 6 Góc nhìn
           </button>
           <button
             type="button"
@@ -354,7 +287,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                 : 'bg-[#EFE7D5]/70 text-[#4D4A3F] hover:bg-[#EFE7D5]'
             }`}
           >
-            3. Các phiên bản & Ảnh từng loại
+            3. Bảng màu & Các phiên bản
           </button>
           <button
             type="button"
@@ -748,128 +681,71 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                     Sản phẩm này chưa có phiên bản phụ. Bạn có thể bấm nút trên để thêm các biến thể phụ kiện.
                   </p>
                 ) : (
-                  <div className="space-y-3">
+                  <div className="space-y-2.5">
                     {variants.map((v, idx) => (
                       <div
                         key={v.id}
-                        className="p-3.5 rounded-2xl bg-white border border-[#987456]/15 space-y-2 shadow-2xs"
+                        className="p-3 rounded-2xl bg-white border border-[#987456]/15 flex items-center gap-3 shadow-2xs"
                       >
-                        <div className="flex items-center gap-3">
-                          {/* Variant Image Preview & Upload */}
-                          <div className="relative group shrink-0">
-                            {v.image ? (
-                              <img
-                                src={v.image}
-                                alt={v.name}
-                                className="w-14 h-14 rounded-xl object-cover border border-[#987456]/20"
-                              />
-                            ) : (
-                              <div className="w-14 h-14 rounded-xl bg-[#F5EEDF] border border-dashed border-[#987456]/30 flex items-center justify-center text-[#987456]">
-                                <ImageIcon className="w-5 h-5 opacity-40" />
-                              </div>
-                            )}
-                            <label className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl flex items-center justify-center text-white cursor-pointer" title="Tải ảnh cho loại này">
-                              <Upload className="w-4 h-4" />
-                              <input
-                                type="file"
-                                accept="image/*"
-                                onChange={(e) => {
-                                  const file = e.target.files?.[0];
-                                  if (file) {
-                                    const reader = new FileReader();
-                                    reader.onloadend = () => {
-                                      const res = reader.result as string;
-                                      setVariants((prev) =>
-                                        prev.map((item) =>
-                                          item.id === v.id ? { ...item, image: res } : item
-                                        )
-                                      );
-                                    };
-                                    reader.readAsDataURL(file);
-                                  }
-                                }}
-                                className="hidden"
-                              />
-                            </label>
-                          </div>
-
-                          <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-2">
-                            <input
-                              type="text"
-                              placeholder="Tên loại: Ếch Đội Mũ Vàng"
-                              value={v.name}
-                              onChange={(e) => {
-                                const val = e.target.value;
-                                setVariants((prev) =>
-                                  prev.map((item) =>
-                                    item.id === v.id ? { ...item, name: val } : item
-                                  )
-                                );
-                              }}
-                              className="px-2.5 py-1.5 rounded-lg bg-[#F5EEDF]/40 border border-[#987456]/15 font-semibold text-xs"
-                            />
-                            <input
-                              type="text"
-                              placeholder="Mô tả: Bé du lịch..."
-                              value={v.tagline}
-                              onChange={(e) => {
-                                const val = e.target.value;
-                                setVariants((prev) =>
-                                  prev.map((item) =>
-                                    item.id === v.id ? { ...item, tagline: val } : item
-                                  )
-                                );
-                              }}
-                              className="px-2.5 py-1.5 rounded-lg bg-[#F5EEDF]/40 border border-[#987456]/15 text-xs italic"
-                            />
-                            <div className="flex items-center gap-1.5">
-                              <span className="text-[11px] text-[#987456] whitespace-nowrap">+ Giá:</span>
-                              <input
-                                type="number"
-                                step={1000}
-                                placeholder="0"
-                                value={v.priceDelta || 0}
-                                onChange={(e) => {
-                                  const val = Number(e.target.value);
-                                  setVariants((prev) =>
-                                    prev.map((item) =>
-                                      item.id === v.id ? { ...item, priceDelta: val } : item
-                                    )
-                                  );
-                                }}
-                                className="w-20 px-2 py-1.5 rounded-lg bg-[#F5EEDF]/40 border border-[#987456]/15 text-xs font-bold"
-                              />
-                              <span className="text-[11px]">đ</span>
-                            </div>
-                          </div>
-
-                          <button
-                            type="button"
-                            onClick={() => removeVariantEdition(v.id)}
-                            className="text-[#987456] hover:text-rose-500 p-1.5 cursor-pointer rounded-lg hover:bg-rose-50"
-                            title="Xóa loại này"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-
-                        {/* URL input for variant photo */}
-                        <div className="pl-17">
+                        <span className="w-6 h-6 rounded-full bg-[#7A8B70]/15 text-[#53634E] flex items-center justify-center font-bold text-xs shrink-0">
+                          {idx + 1}
+                        </span>
+                        <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-2">
                           <input
                             type="text"
-                            placeholder="Hoặc dán URL ảnh trực tiếp cho loại này..."
-                            value={v.image || ''}
+                            placeholder="Tên bản: Ếch Đội Mũ Vàng"
+                            value={v.name}
                             onChange={(e) => {
                               const val = e.target.value;
                               setVariants((prev) =>
                                 prev.map((item) =>
-                                  item.id === v.id ? { ...item, image: val } : item
+                                  item.id === v.id ? { ...item, name: val } : item
                                 )
                               );
                             }}
-                            className="w-full text-[11px] px-2.5 py-1 rounded-lg bg-[#F5EEDF]/30 border border-[#987456]/15"
+                            className="px-2.5 py-1.5 rounded-lg bg-[#F5EEDF]/40 border border-[#987456]/15 font-semibold text-xs"
                           />
+                          <input
+                            type="text"
+                            placeholder="Khẩu hiệu: Bé du lịch..."
+                            value={v.tagline}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setVariants((prev) =>
+                                prev.map((item) =>
+                                  item.id === v.id ? { ...item, tagline: val } : item
+                                )
+                              );
+                            }}
+                            className="px-2.5 py-1.5 rounded-lg bg-[#F5EEDF]/40 border border-[#987456]/15 text-xs italic"
+                          />
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[11px] text-[#987456] whitespace-nowrap">+ Giá:</span>
+                            <input
+                              type="number"
+                              step={1000}
+                              placeholder="0"
+                              value={v.priceDelta || 0}
+                              onChange={(e) => {
+                                const val = Number(e.target.value);
+                                setVariants((prev) =>
+                                  prev.map((item) =>
+                                    item.id === v.id ? { ...item, priceDelta: val } : item
+                                  )
+                                );
+                              }}
+                              className="w-20 px-2 py-1.5 rounded-lg bg-[#F5EEDF]/40 border border-[#987456]/15 text-xs font-bold"
+                            />
+                            <span className="text-[11px]">đ</span>
+                          </div>
                         </div>
+                        <button
+                          type="button"
+                          onClick={() => removeVariantEdition(v.id)}
+                          className="text-[#987456] hover:text-rose-500 p-1 cursor-pointer"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
                       </div>
                     ))}
                   </div>
