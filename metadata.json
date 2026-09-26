@@ -1,0 +1,7 @@
+{
+  "name": "Một Chút Nắng",
+  "description": "Mini e-commerce website mobile-first dành cho thương hiệu đồ len handmade Một Chút Nắng.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+

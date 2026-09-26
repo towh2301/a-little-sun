@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-serif: 'Cormorant Garamond', Georgia, serif;
+    --font-hand: 'Patrick Hand', cursive;
+    --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+
+    --color-cream: #FFF9EF;
+    --color-paper: #F5EEDF;
+    --color-sage: #7A8B70;
+    --color-darkgreen: #53634E;
+    --color-sunyellow: #E8B85C;
+    --color-warmbrown: #987456;
+    --color-terracotta: #B87559;
+    --color-crafttext: #4D4A3F;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    color: var(--color-crafttext);
+    background-color: var(--color-cream);
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+.font-serif-soft {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+}
+
+.font-handwriting {
+  font-family: 'Patrick Hand', cursive;
+}
+
+/* Hide scrollbar for clean horizontal product filter */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Scrapbook tape & kraft paper effects */
+.paper-shadow {
+  box-shadow: 0 4px 20px -2px rgba(152, 116, 86, 0.08), 0 2px 6px -1px rgba(152, 116, 86, 0.04);
+}
+
+.paper-card {
+  background-color: #FBF6EC;
+  border: 1px solid rgba(152, 116, 86, 0.12);
+}
+
+.tape-top {
+  position: relative;
+}
+.tape-top::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-1.5deg);
+  width: 54px;
+  height: 18px;
+  background-color: rgba(232, 184, 92, 0.45);
+  backdrop-filter: blur(2px);
+  border: 1px dashed rgba(152, 116, 86, 0.25);
+  border-radius: 2px;
+  z-index: 10;
+}
