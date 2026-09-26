@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, CheckCircle, Package, ArrowLeft, Send } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { formatVND } from '../data/products';
+import { BackendStore } from '../services/backendStore';
 
 export const CheckoutModal: React.FC = () => {
   const { isCheckoutOpen, closeCheckout, items, subtotal, clearCart } = useCart();
@@ -40,6 +41,20 @@ export const CheckoutModal: React.FC = () => {
     // Generate cute order code
     const randomCode = `MCN-${Math.floor(1000 + Math.random() * 9000)}`;
     setOrderCode(randomCode);
+
+    // Save to Backend Store database
+    BackendStore.createOrder({
+      orderId: randomCode,
+      fullName: fullName.trim(),
+      phone: phone.trim(),
+      address: address.trim(),
+      note: note.trim(),
+      items: [...items],
+      subtotal,
+      shippingFee,
+      total,
+    });
+
     setOrderSuccess(true);
     clearCart();
   };

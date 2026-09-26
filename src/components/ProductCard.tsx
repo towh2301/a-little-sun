@@ -41,6 +41,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </span>
         </div>
 
+        {/* Highlight Tag Badge */}
+        {product.highlightText && (
+          <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full bg-[#7A8B70] text-white text-[10px] font-bold shadow-xs">
+            {product.highlightText}
+          </div>
+        )}
+
         {/* Quick Add Button */}
         <button
           onClick={handleQuickAdd}

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { CartProvider, useCart } from './context/CartContext';
 import { Header } from './components/Header';
 import { HeroSection } from './components/HeroSection';
@@ -13,66 +13,58 @@ import { PackagingSection } from './components/PackagingSection';
 import { InstagramSection } from './components/InstagramSection';
 import { Footer } from './components/Footer';
 import { BottomNav } from './components/BottomNav';
-import { PRODUCTS } from './data/products';
-import { Smartphone, Monitor } from 'lucide-react';
+import { AdminDashboard } from './components/AdminDashboard';
+import { BackendStore } from './services/backendStore';
+import { Product } from './types';
 
 const MainContent: React.FC = () => {
   const { toastMessage } = useCart();
   const [currentFilter, setCurrentFilter] = useState('all');
   const [activeTab, setActiveTab] = useState('home');
-  const [desktopViewMode, setDesktopViewMode] = useState<'mobile' | 'wide'>('wide');
+  const [isAdminView, setIsAdminView] = useState(() => {
+    return window.location.hash === '#admin' || window.location.search.includes('admin');
+  });
+  const [productsList, setProductsList] = useState<Product[]>([]);
+
+  // Listen to hash change for #admin route
+  useEffect(() => {
+    const handleHashChange = () => {
+      setIsAdminView(window.location.hash === '#admin' || window.location.search.includes('admin'));
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
+  // Load products dynamically from BackendStore
+  useEffect(() => {
+    setProductsList(BackendStore.getProducts());
+  }, [isAdminView]);
 
   // Filter products based on active category
   const filteredProducts = useMemo(() => {
-    if (currentFilter === 'all') return PRODUCTS;
-    return PRODUCTS.filter((p) => p.category === currentFilter);
-  }, [currentFilter]);
+    if (currentFilter === 'all') return productsList;
+    return productsList.filter((p) => p.category === currentFilter);
+  }, [currentFilter, productsList]);
+
+  // If viewing admin dashboard
+  if (isAdminView) {
+    return (
+      <AdminDashboard
+        onBackToShop={() => {
+          window.location.hash = '';
+          setIsAdminView(false);
+        }}
+      />
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-[#F5EEDF] flex flex-col items-center">
-      {/* Desktop Helper Bar: Allows reviewer to view in expansive desktop layout or exact 390px mobile frame */}
-      <aside aria-label="Bộ điều khiển chế độ xem" className="hidden lg:flex w-full bg-[#E8DCB8]/60 border-b border-[#987456]/20 px-6 py-2 items-center justify-between text-xs text-[#4D4A3F] backdrop-blur-xs sticky top-0 z-50">
-        <div className="flex items-center gap-2">
-          <span className="font-serif-soft font-bold text-sm">Một Chút Nắng</span>
-          <span className="text-[#987456]">· Chế độ hiển thị giao diện</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setDesktopViewMode('wide')}
-            className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all cursor-pointer ${
-              desktopViewMode === 'wide'
-                ? 'bg-[#7A8B70] text-white shadow-xs'
-                : 'bg-[#FFF9EF] text-[#4D4A3F] hover:bg-white'
-            }`}
-          >
-            <Monitor className="w-3.5 h-3.5" />
-            <span>Màn Hình Desktop Rộng</span>
-          </button>
-          <button
-            onClick={() => setDesktopViewMode('mobile')}
-            className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all cursor-pointer ${
-              desktopViewMode === 'mobile'
-                ? 'bg-[#7A8B70] text-white shadow-xs'
-                : 'bg-[#FFF9EF] text-[#4D4A3F] hover:bg-white'
-            }`}
-          >
-            <Smartphone className="w-3.5 h-3.5" />
-            <span>Khung Điện Thoại (390px)</span>
-          </button>
-        </div>
-      </aside>
+    <div className="min-h-screen bg-[#FFF9EF] text-[#4D4A3F] flex flex-col w-full selection:bg-[#E8B85C]/30 selection:text-[#4D4A3F]">
+      {/* Sticky Header spanning 100% width with max-w inner container */}
+      <Header onOpenAdmin={() => setIsAdminView(true)} />
 
-      {/* Main App Container */}
-      <main
-        className={`w-full min-h-screen bg-[#FFF9EF] text-[#4D4A3F] transition-all duration-300 relative flex flex-col ${
-          desktopViewMode === 'mobile'
-            ? 'max-w-[430px] my-0 lg:my-6 rounded-none lg:rounded-[40px] shadow-none lg:shadow-2xl border-0 lg:border-8 lg:border-[#4D4A3F]/15 overflow-hidden ring-1 ring-[#987456]/20'
-            : 'max-w-6xl shadow-sm border-x border-[#987456]/15'
-        }`}
-      >
-        {/* Sticky Header */}
-        <Header />
-
+      {/* Main Content Area */}
+      <main className="flex-1 w-full flex flex-col">
         {/* 1. Hero Section */}
         <HeroSection />
 
@@ -99,8 +91,8 @@ const MainContent: React.FC = () => {
             />
           </div>
 
-          {/* Responsive Product Grid: 2 cols on mobile, 3-4 cols on desktop */}
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 sm:gap-5 lg:gap-6">
+          {/* Responsive Product Grid: 2 cols on mobile, 2 cols on small tablet, 3 cols on tablet, 4 cols on desktop */}
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
             {filteredProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
@@ -124,25 +116,25 @@ const MainContent: React.FC = () => {
 
         {/* 6. Instagram Feed Section */}
         <InstagramSection />
-
-        {/* 7. Footer */}
-        <Footer />
-
-        {/* 8. Fixed Bottom Navigation Bar (Mobile only) */}
-        <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
-
-        {/* 9. Floating Toast Notification */}
-        {toastMessage && (
-          <aside aria-label="Thông báo giỏ hàng" className="fixed top-16 left-1/2 -translate-x-1/2 z-50 max-w-xs px-4 py-2 rounded-full bg-[#53634E] text-white text-xs font-medium shadow-lg animate-in fade-in slide-in-from-top-3 duration-200 text-center pointer-events-none">
-            {toastMessage}
-          </aside>
-        )}
-
-        {/* Modals & Drawers */}
-        <ProductDetailModal />
-        <CartDrawer />
-        <CheckoutModal />
       </main>
+
+      {/* 7. Footer spanning full width with full-bleed background */}
+      <Footer onOpenAdmin={() => setIsAdminView(true)} />
+
+      {/* 8. Fixed Bottom Navigation Bar (Mobile only) */}
+      <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
+
+      {/* 9. Floating Toast Notification */}
+      {toastMessage && (
+        <aside aria-label="Thông báo giỏ hàng" className="fixed top-16 left-1/2 -translate-x-1/2 z-50 max-w-xs px-4 py-2 rounded-full bg-[#53634E] text-white text-xs font-medium shadow-lg animate-in fade-in slide-in-from-top-3 duration-200 text-center pointer-events-none">
+          {toastMessage}
+        </aside>
+      )}
+
+      {/* Modals & Drawers */}
+      <ProductDetailModal />
+      <CartDrawer />
+      <CheckoutModal />
     </div>
   );
 };

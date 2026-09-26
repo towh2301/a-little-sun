@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { ShoppingBag, Heart, Sparkles, Instagram, Phone } from 'lucide-react';
+import { ShoppingBag, Heart, Sparkles, Instagram, Phone, SlidersHorizontal } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { formatVND } from '../data/products';
 
-export const Header: React.FC = () => {
+interface HeaderProps {
+  onOpenAdmin?: () => void;
+}
+
+export const Header: React.FC<HeaderProps> = ({ onOpenAdmin }) => {
   const { totalQuantity, openCart, subtotal } = useCart();
   const [scrolled, setScrolled] = useState(false);
 

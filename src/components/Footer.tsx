@@ -1,7 +1,11 @@
 import React from 'react';
 import { Heart, Instagram, Mail, Phone, MapPin } from 'lucide-react';
 
-export const Footer: React.FC = () => {
+interface FooterProps {
+  onOpenAdmin?: () => void;
+}
+
+export const Footer: React.FC<FooterProps> = ({ onOpenAdmin }) => {
   const scrollTo = (id: string) => (e: React.MouseEvent) => {
     e.preventDefault();
     if (id === 'top') {
@@ -124,7 +128,17 @@ export const Footer: React.FC = () => {
 
         {/* Bottom Copyright */}
         <div className="pt-6 flex flex-col sm:flex-row items-center justify-between text-[11px] text-[#987456]/80 gap-3 text-center sm:text-left">
-          <p>© {new Date().getFullYear()} Một Chút Nắng. Giữ lại một chút nắng cho những ngày chậm lớn.</p>
+          <div className="flex items-center gap-2">
+            <p>© {new Date().getFullYear()} Một Chút Nắng. Giữ lại một chút nắng cho những ngày chậm lớn.</p>
+            {onOpenAdmin && (
+              <button
+                onClick={onOpenAdmin}
+                className="text-[#987456] hover:text-[#53634E] underline underline-offset-2 ml-2 cursor-pointer text-[10px]"
+              >
+                (Góc chủ tiệm)
+              </button>
+            )}
+          </div>
           <p className="font-handwriting text-base text-[#53634E]">
             Handmade with love in Vietnam ♡
           </p>

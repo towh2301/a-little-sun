@@ -1,22 +1,44 @@
-import React, { useState, useEffect } from 'react';
-import { X, Minus, Plus, Heart, Sparkles, Check } from 'lucide-react';
-import { Product } from '../types';
+import React, { useState } from 'react';
+import { 
+  X, 
+  Minus, 
+  Plus, 
+  Sparkles, 
+  Check, 
+  Ruler, 
+  Palette, 
+  Lightbulb, 
+  Layers, 
+  BookOpen, 
+  Smile, 
+  Heart,
+  Share2
+} from 'lucide-react';
+import { Product, ProductVariantEdition } from '../types';
 import { COLOR_OPTIONS, PRODUCTS, formatVND } from '../data/products';
 import { useCart } from '../context/CartContext';
 
 export const ProductDetailModal: React.FC = () => {
   const { selectedProductForDetail, closeProductDetail, addToCart } = useCart();
-  const [selectedColor, setSelectedColor] = useState<string>('Xanh Sage');
   const [currentProduct, setCurrentProduct] = useState<Product | null>(null);
+  const [selectedColor, setSelectedColor] = useState<string>('');
+  const [selectedVariant, setSelectedVariant] = useState<ProductVariantEdition | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [justAdded, setJustAdded] = useState(false);
+  const [activeTab, setActiveTab] = useState<'story' | 'materials' | 'variants' | 'usage'>('story');
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (selectedProductForDetail) {
       setCurrentProduct(selectedProductForDetail);
       setSelectedColor(selectedProductForDetail.color);
+      if (selectedProductForDetail.variants && selectedProductForDetail.variants.length > 0) {
+        setSelectedVariant(selectedProductForDetail.variants[0]);
+      } else {
+        setSelectedVariant(null);
+      }
       setQuantity(1);
       setJustAdded(false);
+      setActiveTab('story');
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
@@ -28,16 +50,24 @@ export const ProductDetailModal: React.FC = () => {
 
   if (!selectedProductForDetail || !currentProduct) return null;
 
-  const handleColorChange = (colorName: string) => {
-    setSelectedColor(colorName);
-    const matchingProd = PRODUCTS.find((p) => p.color === colorName);
-    if (matchingProd) {
-      setCurrentProduct(matchingProd);
+  const currentPrice = currentProduct.price + (selectedVariant?.priceDelta || 0);
+
+  const handleSelectProduct = (prod: Product) => {
+    setCurrentProduct(prod);
+    setSelectedColor(prod.color);
+    if (prod.variants && prod.variants.length > 0) {
+      setSelectedVariant(prod.variants[0]);
+    } else {
+      setSelectedVariant(null);
     }
   };
 
   const handleAddToCart = () => {
-    addToCart(currentProduct, selectedColor, quantity);
+    addToCart(
+      currentProduct, 
+      selectedColor || currentProduct.color, 
+      quantity
+    );
     setJustAdded(true);
     setTimeout(() => {
       setJustAdded(false);
@@ -46,7 +76,7 @@ export const ProductDetailModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-6 bg-black/50 backdrop-blur-xs transition-opacity duration-300">
+    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-4 bg-black/60 backdrop-blur-xs transition-opacity duration-300">
       {/* Click outside backdrop */}
       <div
         className="absolute inset-0"
@@ -54,207 +84,365 @@ export const ProductDetailModal: React.FC = () => {
         aria-hidden="true"
       />
 
-      {/* Modal Container: Bottom sheet on mobile, centered card on desktop */}
-      <div className="relative w-full max-w-md md:max-w-3xl max-h-[92vh] bg-[#FFF9EF] rounded-t-3xl md:rounded-[32px] border-t md:border border-[#987456]/20 shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom md:zoom-in-95 duration-300">
+      {/* Main Scrapbook Sheet Container */}
+      <div className="relative w-full max-w-4xl max-h-[94vh] bg-[#FFF9EF] rounded-t-3xl md:rounded-[32px] border-t md:border border-[#987456]/20 shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom md:zoom-in-95 duration-300">
+        
         {/* Mobile Grab Handle */}
         <div className="md:hidden w-12 h-1.5 bg-[#987456]/25 rounded-full mx-auto mt-3 shrink-0" />
 
-        {/* Modal Header */}
-        <div className="flex items-center justify-between px-5 md:px-8 pt-3 pb-3 border-b border-[#987456]/15 shrink-0 bg-[#F5EEDF]/40">
-          <div className="flex items-center gap-2">
-            <span className="text-base select-none">🌱</span>
-            <span className="text-xs font-semibold text-[#7A8B70] tracking-wider uppercase">
-              Một Chút Nắng · Đồ len thủ công
-            </span>
+        {/* Scrapbook Sheet Header */}
+        <div className="flex items-center justify-between px-5 md:px-8 py-3.5 border-b border-[#987456]/15 shrink-0 bg-[#F5EEDF]/60">
+          <div className="flex items-center gap-2.5">
+            <span className="text-xl">🐸</span>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-serif-soft font-bold text-base md:text-lg text-[#4D4A3F]">
+                  {currentProduct.name}
+                </span>
+                {currentProduct.highlightText && (
+                  <span className="text-[10px] font-semibold bg-[#7A8B70]/15 text-[#53634E] px-2 py-0.5 rounded-full">
+                    {currentProduct.highlightText}
+                  </span>
+                )}
+              </div>
+              {currentProduct.subtitle && (
+                <p className="text-xs text-[#987456] italic -mt-0.5">
+                  {currentProduct.subtitle}
+                </p>
+              )}
+            </div>
           </div>
+
           <button
             onClick={closeProductDetail}
             aria-label="Đóng chi tiết"
-            className="w-8 h-8 rounded-full bg-[#FFF9EF] hover:bg-white flex items-center justify-center text-[#4D4A3F] border border-[#987456]/15 transition-colors cursor-pointer"
+            className="w-8 h-8 rounded-full bg-[#FFF9EF] hover:bg-white flex items-center justify-center text-[#4D4A3F] border border-[#987456]/15 transition-colors cursor-pointer shadow-2xs"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Modal Body: 1 Column on Mobile, 2 Columns on Desktop */}
-        <div className="overflow-y-auto px-5 md:px-8 py-5 md:py-6 flex-1">
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8 items-start">
-            {/* Left Column: Product Image Gallery */}
-            <div className="md:col-span-6 space-y-3">
-              <div className="relative aspect-square w-full rounded-2xl md:rounded-3xl overflow-hidden bg-[#F5EEDF] border border-[#987456]/20 shadow-sm">
+        {/* Modal Scrollable Body */}
+        <div className="overflow-y-auto px-5 md:px-8 py-5 md:py-6 flex-1 space-y-6">
+          
+          {/* Top Section: Visual & Key Specs */}
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+            
+            {/* Left: Product Hero Photo & Badge */}
+            <div className="md:col-span-5 space-y-3">
+              <div className="relative aspect-square w-full rounded-2xl md:rounded-3xl overflow-hidden bg-[#F5EEDF] border-2 border-[#987456]/20 shadow-md group">
                 <img
-                  src={currentProduct.image}
+                  src={selectedVariant?.image || currentProduct.image}
                   alt={currentProduct.name}
-                  className="w-full h-full object-cover object-center"
+                  className="w-full h-full object-cover object-center group-hover:scale-103 transition-transform duration-500"
                   referrerPolicy="no-referrer"
                 />
-                <div className="absolute bottom-3 left-3 bg-[#FFF9EF]/90 backdrop-blur-xs px-3 py-1 rounded-full border border-[#987456]/15 text-xs font-medium text-[#4D4A3F] flex items-center gap-2 shadow-2xs">
-                  <span
-                    className="w-2.5 h-2.5 rounded-full border border-black/10"
-                    style={{ backgroundColor: currentProduct.colorHex }}
-                  />
-                  <span>{selectedColor}</span>
+                
+                {/* Vintage Scrapbook Stamp Tag */}
+                <div className="absolute top-3 left-3 bg-[#FFF9EF]/95 backdrop-blur-xs px-3 py-1 rounded-full border border-[#987456]/20 text-xs font-semibold text-[#4D4A3F] flex items-center gap-1.5 shadow-2xs">
+                  <span>🍃</span>
+                  <span>Móc thủ công 100%</span>
+                </div>
+
+                {/* Subtitle tag */}
+                <div className="absolute bottom-3 left-3 right-3 bg-[#4D4A3F]/85 backdrop-blur-xs px-3 py-1.5 rounded-xl text-white text-[11px] text-center italic">
+                  “{currentProduct.storyQuote || 'Nhỏ xinh, dễ thương, mang theo cả niềm vui'}”
                 </div>
               </div>
 
-              {/* Color thumbnails strip */}
-              <div className="grid grid-cols-4 gap-2">
-                {PRODUCTS.map((p) => {
-                  const isMatch = p.color === selectedColor;
-                  return (
-                    <button
-                      key={p.id}
-                      onClick={() => handleColorChange(p.color)}
-                      className={`relative aspect-square rounded-xl overflow-hidden border-2 transition-all ${
-                        isMatch
-                          ? 'border-[#7A8B70] ring-2 ring-[#7A8B70]/30 shadow-xs'
-                          : 'border-[#987456]/20 opacity-70 hover:opacity-100'
-                      }`}
-                    >
-                      <img
-                        src={p.image}
-                        alt={p.name}
-                        className="w-full h-full object-cover"
-                        referrerPolicy="no-referrer"
-                      />
-                    </button>
-                  );
-                })}
-              </div>
+              {/* Angle thumbnails if available */}
+              {currentProduct.angles && currentProduct.angles.length > 0 && (
+                <div>
+                  <p className="text-[11px] font-bold text-[#987456] uppercase tracking-wider mb-1.5">
+                    Các góc nhìn thành phẩm:
+                  </p>
+                  <div className="grid grid-cols-6 gap-1.5 text-center">
+                    {currentProduct.angles.map((ang, i) => (
+                      <div key={i} className="flex flex-col items-center">
+                        <div className="w-full aspect-square rounded-lg border border-[#987456]/20 overflow-hidden bg-white p-0.5">
+                          <img src={ang.image} alt={ang.label} className="w-full h-full object-cover rounded-md" />
+                        </div>
+                        <span className="text-[9px] text-[#4D4A3F] mt-0.5 font-medium truncate w-full">
+                          {ang.label}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* Right Column: Details & Customization */}
-            <div className="md:col-span-6 space-y-4">
-              <div>
-                <h2 className="font-serif-soft text-2xl md:text-3xl font-bold text-[#4D4A3F] leading-snug">
-                  {currentProduct.name}
-                </h2>
-                <div className="mt-2 flex items-baseline gap-3">
-                  <span className="text-xl md:text-2xl font-bold text-[#53634E] tabular-nums">
-                    {formatVND(currentProduct.price)}
+            {/* Right: Key Info, Pricing, Variant Selection */}
+            <div className="md:col-span-7 space-y-4">
+              
+              {/* Price & Stock Badge */}
+              <div className="flex items-baseline justify-between border-b border-[#987456]/15 pb-3">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-2xl md:text-3xl font-bold text-[#53634E] font-serif-soft tabular-nums">
+                    {formatVND(currentPrice)}
                   </span>
-                  <span className="text-xs text-[#7A8B70] bg-[#7A8B70]/10 px-2.5 py-0.5 rounded-full font-semibold">
-                    Móc thủ công từng chiếc
-                  </span>
+                  {selectedVariant?.priceDelta ? (
+                    <span className="text-xs text-[#987456]">
+                      (Đã bao gồm phụ kiện phiên bản)
+                    </span>
+                  ) : null}
+                </div>
+                <div className="text-xs font-semibold text-[#7A8B70] bg-[#7A8B70]/10 px-3 py-1 rounded-full">
+                  Còn {currentProduct.stock} bạn sẵn sàng về nhà mới
                 </div>
               </div>
 
-              {/* Story Quote Card */}
-              <div className="p-3.5 rounded-2xl bg-[#F5EEDF]/80 border border-[#987456]/15 text-xs md:text-sm text-[#987456] leading-relaxed italic">
-                “{currentProduct.description}”
-              </div>
+              {/* Tags Strip (Nhỏ xinh, Thân thiện, Năng lượng...) */}
+              {currentProduct.tags && (
+                <div className="flex flex-wrap gap-2">
+                  {currentProduct.tags.map((tag, idx) => (
+                    <span
+                      key={idx}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-[#EFE7D5] text-[#4D4A3F] border border-[#987456]/15"
+                    >
+                      <Sparkles className="w-3 h-3 text-[#E8B85C]" />
+                      <span>{tag}</span>
+                    </span>
+                  ))}
+                </div>
+              )}
 
-              {/* Handmade Specifications */}
-              <div className="grid grid-cols-2 gap-2.5 text-xs">
-                <div className="p-2.5 rounded-xl bg-[#FBF6EC] border border-[#987456]/15 flex items-center gap-2.5">
-                  <span className="text-lg">🧶</span>
-                  <div>
-                    <p className="text-[10px] text-[#987456]">Chất liệu</p>
-                    <p className="font-semibold text-[#4D4A3F]">Len sợi mềm mịn</p>
+              {/* Choose Variant Edition if product has multiple styles */}
+              {currentProduct.variants && currentProduct.variants.length > 0 && (
+                <div className="space-y-2">
+                  <label className="block text-xs font-bold text-[#4D4A3F] uppercase tracking-wide">
+                    Chọn phiên bản: <span className="text-[#53634E] font-semibold">{selectedVariant?.name}</span>
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {currentProduct.variants.map((v) => {
+                      const isSelected = selectedVariant?.id === v.id;
+                      return (
+                        <button
+                          key={v.id}
+                          onClick={() => setSelectedVariant(v)}
+                          className={`p-2.5 rounded-xl text-left border transition-all cursor-pointer flex flex-col justify-between ${
+                            isSelected
+                              ? 'bg-[#7A8B70]/10 border-[#7A8B70] ring-1 ring-[#7A8B70] shadow-xs'
+                              : 'bg-white/80 border-[#987456]/20 hover:bg-[#F5EEDF]/50'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-bold text-[#4D4A3F]">{v.name}</span>
+                            {isSelected && <Check className="w-3.5 h-3.5 text-[#53634E]" />}
+                          </div>
+                          <p className="text-[11px] text-[#987456] italic mt-0.5 line-clamp-1">
+                            {v.tagline}
+                          </p>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
-                <div className="p-2.5 rounded-xl bg-[#FBF6EC] border border-[#987456]/15 flex items-center gap-2.5">
-                  <span className="text-lg">☀️</span>
+              )}
+
+              {/* Size & Dimension Banner */}
+              <div className="p-3 rounded-2xl bg-[#F5EEDF]/80 border border-[#987456]/15 flex items-center justify-between text-xs">
+                <div className="flex items-center gap-2">
+                  <Ruler className="w-4 h-4 text-[#7A8B70]" />
                   <div>
-                    <p className="text-[10px] text-[#987456]">Phương thức</p>
-                    <p className="font-semibold text-[#4D4A3F]">Móc thủ công 100%</p>
+                    <span className="font-bold text-[#4D4A3F]">Kích thước thật: </span>
+                    <span className="text-[#53634E] font-semibold">
+                      {currentProduct.sizeDimension 
+                        ? `Cao ~${currentProduct.sizeDimension.height} × Ngang ~${currentProduct.sizeDimension.width}` 
+                        : currentProduct.size}
+                    </span>
                   </div>
                 </div>
-                <div className="p-2.5 rounded-xl bg-[#FBF6EC] border border-[#987456]/15 flex items-center gap-2.5">
-                  <span className="text-lg">📏</span>
-                  <div>
-                    <p className="text-[10px] text-[#987456]">Kích thước</p>
-                    <p className="font-semibold text-[#4D4A3F]">{currentProduct.size}</p>
+                <span className="text-[10px] text-[#987456] italic">Cầm vừa lòng bàn tay</span>
+              </div>
+
+              {/* Quantity Selector & Add to Cart Action */}
+              <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                <div className="flex items-center justify-between sm:justify-start gap-3 bg-[#EFE7D5] px-3 py-2 rounded-full border border-[#987456]/15">
+                  <span className="text-xs font-bold text-[#4D4A3F]">Số lượng:</span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                      disabled={quantity <= 1}
+                      className="w-7 h-7 rounded-full bg-[#FFF9EF] hover:bg-white flex items-center justify-center text-[#4D4A3F] disabled:opacity-40 transition-colors shadow-2xs cursor-pointer"
+                    >
+                      <Minus className="w-3.5 h-3.5" />
+                    </button>
+                    <span className="text-xs font-bold text-[#4D4A3F] tabular-nums min-w-[20px] text-center">
+                      {quantity}
+                    </span>
+                    <button
+                      onClick={() => setQuantity((q) => Math.min(currentProduct.stock, q + 1))}
+                      className="w-7 h-7 rounded-full bg-[#FFF9EF] hover:bg-white flex items-center justify-center text-[#4D4A3F] transition-colors shadow-2xs cursor-pointer"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                    </button>
                   </div>
                 </div>
-                <div className="p-2.5 rounded-xl bg-[#FBF6EC] border border-[#987456]/15 flex items-center gap-2.5">
-                  <span className="text-lg">🎁</span>
-                  <div>
-                    <p className="text-[10px] text-[#987456]">Bao bì quà tặng</p>
-                    <p className="font-semibold text-[#4D4A3F]">Card kraft & hoa khô</p>
-                  </div>
-                </div>
-              </div>
 
-              {/* Color Selector Swatches */}
-              <div>
-                <label className="block text-xs font-bold text-[#4D4A3F] mb-2">
-                  Chọn màu len: <span className="font-normal text-[#987456]">{selectedColor}</span>
-                </label>
-                <div className="flex flex-wrap items-center gap-2">
-                  {COLOR_OPTIONS.map((col) => {
-                    const isCurrent = selectedColor === col.name;
-                    return (
-                      <button
-                        key={col.id}
-                        onClick={() => handleColorChange(col.name)}
-                        className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all cursor-pointer ${
-                          isCurrent
-                            ? 'border-[#7A8B70] bg-[#7A8B70]/10 text-[#4D4A3F] shadow-xs'
-                            : 'border-[#987456]/25 bg-[#FFF9EF] text-[#4D4A3F]/80 hover:bg-[#F5EEDF]'
-                        }`}
-                      >
-                        <span
-                          className="w-3 h-3 rounded-full border border-black/10 shrink-0"
-                          style={{ backgroundColor: col.hex }}
-                        />
-                        <span>{col.name}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Quantity Stepper */}
-              <div className="flex items-center justify-between pt-1">
-                <span className="text-xs font-bold text-[#4D4A3F]">Số lượng:</span>
-                <div className="flex items-center gap-3 bg-[#F5EEDF] px-2.5 py-1 rounded-full border border-[#987456]/15">
-                  <button
-                    onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                    aria-label="Giảm số lượng"
-                    className="w-7 h-7 rounded-full bg-[#FFF9EF] hover:bg-white flex items-center justify-center text-[#4D4A3F] disabled:opacity-40 transition-colors shadow-2xs cursor-pointer"
-                    disabled={quantity <= 1}
-                  >
-                    <Minus className="w-3.5 h-3.5" />
-                  </button>
-                  <span className="text-xs font-bold text-[#4D4A3F] tabular-nums min-w-[20px] text-center">
-                    {quantity}
-                  </span>
-                  <button
-                    onClick={() => setQuantity((q) => Math.min(currentProduct.stock, q + 1))}
-                    aria-label="Tăng số lượng"
-                    className="w-7 h-7 rounded-full bg-[#FFF9EF] hover:bg-white flex items-center justify-center text-[#4D4A3F] transition-colors shadow-2xs cursor-pointer"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Add to Cart CTA */}
-              <div className="pt-2">
                 <button
                   onClick={handleAddToCart}
-                  className={`w-full min-h-[50px] rounded-2xl text-sm font-semibold flex items-center justify-center gap-2 shadow-sm transition-all duration-200 active:scale-98 cursor-pointer ${
+                  className={`flex-1 py-3 px-6 rounded-full font-serif-soft font-bold text-sm tracking-wide shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-98 ${
                     justAdded
-                      ? 'bg-[#53634E] text-white'
-                      : 'bg-[#7A8B70] hover:bg-[#53634E] text-white'
+                      ? 'bg-[#53634E] text-white ring-2 ring-[#53634E]/30'
+                      : 'bg-[#7A8B70] hover:bg-[#687860] text-white hover:shadow-lg'
                   }`}
                 >
                   {justAdded ? (
                     <>
-                      <Check className="w-4 h-4 animate-bounce" />
-                      <span>Đã vào giỏ rồi nè! ♡</span>
+                      <Check className="w-4 h-4" />
+                      <span>Đã thêm vào giỏ ♡</span>
                     </>
                   ) : (
                     <>
-                      <Heart className="w-4 h-4 fill-white/20" />
-                      <span>Thêm vào giỏ ♡ · {formatVND(currentProduct.price * quantity)}</span>
+                      <Heart className="w-4 h-4 fill-white" />
+                      <span>Đón bạn này về nhà ({formatVND(currentPrice * quantity)})</span>
                     </>
                   )}
                 </button>
               </div>
             </div>
           </div>
+
+          {/* Bottom Infographic Scrapbook Tabs (Story, Materials, Usage Ideas) */}
+          <div className="pt-2 border-t border-[#987456]/15">
+            <div className="flex items-center gap-2 border-b border-[#987456]/15 pb-2 overflow-x-auto no-scrollbar">
+              <button
+                onClick={() => setActiveTab('story')}
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                  activeTab === 'story'
+                    ? 'bg-[#7A8B70] text-white shadow-xs'
+                    : 'bg-[#EFE7D5]/70 text-[#4D4A3F] hover:bg-[#EFE7D5]'
+                }`}
+              >
+                <BookOpen className="w-3.5 h-3.5" />
+                <span>Câu chuyện của bạn</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('materials')}
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                  activeTab === 'materials'
+                    ? 'bg-[#7A8B70] text-white shadow-xs'
+                    : 'bg-[#EFE7D5]/70 text-[#4D4A3F] hover:bg-[#EFE7D5]'
+                }`}
+              >
+                <Palette className="w-3.5 h-3.5" />
+                <span>Nguyên liệu & Màu sắc</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('usage')}
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                  activeTab === 'usage'
+                    ? 'bg-[#7A8B70] text-white shadow-xs'
+                    : 'bg-[#EFE7D5]/70 text-[#4D4A3F] hover:bg-[#EFE7D5]'
+                }`}
+              >
+                <Lightbulb className="w-3.5 h-3.5" />
+                <span>Ý tưởng sử dụng</span>
+              </button>
+            </div>
+
+            {/* TAB CONTENT: 1. STORY */}
+            {activeTab === 'story' && (
+              <div className="py-4 space-y-3">
+                <div className="p-4 rounded-2xl bg-[#FBF6EC] border border-[#987456]/15 text-xs sm:text-sm text-[#4D4A3F] leading-relaxed whitespace-pre-line shadow-2xs">
+                  {currentProduct.story || currentProduct.description}
+                </div>
+                <div className="flex items-center gap-2 text-xs text-[#987456] italic">
+                  <span>💌</span>
+                  <span>Đóng gói: {currentProduct.packagingNote}</span>
+                </div>
+              </div>
+            )}
+
+            {/* TAB CONTENT: 2. MATERIALS & COLOR PALETTE */}
+            {activeTab === 'materials' && (
+              <div className="py-4 space-y-4">
+                <p className="text-xs text-[#987456]">
+                  Chất liệu: <strong className="text-[#4D4A3F]">{currentProduct.material}</strong>
+                </p>
+
+                {currentProduct.materialsList ? (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5">
+                    {currentProduct.materialsList.map((m, idx) => (
+                      <div
+                        key={idx}
+                        className="p-2.5 rounded-xl bg-[#FBF6EC] border border-[#987456]/15 flex flex-col items-center text-center space-y-1.5 shadow-2xs"
+                      >
+                        <span
+                          className="w-7 h-7 rounded-full border border-black/15 shadow-2xs"
+                          style={{ backgroundColor: m.hex }}
+                        />
+                        <span className="text-[11px] font-bold text-[#4D4A3F]">{m.part}</span>
+                        <span className="text-[10px] text-[#987456]">({m.colorName})</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-3 rounded-xl bg-[#FBF6EC] text-xs text-[#4D4A3F]">
+                    Sợi len cotton tự nhiên mềm mại, móc tay tỉ mỉ từng chi tiết nhỏ.
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* TAB CONTENT: 3. USAGE IDEAS */}
+            {activeTab === 'usage' && (
+              <div className="py-4 space-y-2.5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  {(currentProduct.usageIdeas || [
+                    'Làm móc khóa, treo balo, túi xách',
+                    'Trang trí góc bàn học, bàn làm việc',
+                    'Làm quà tặng bạn bè, người thương',
+                  ]).map((idea, idx) => (
+                    <div
+                      key={idx}
+                      className="p-3 rounded-xl bg-[#FBF6EC] border border-[#987456]/15 flex items-center gap-2.5 text-xs text-[#4D4A3F]"
+                    >
+                      <span className="w-5 h-5 rounded-full bg-[#7A8B70]/15 text-[#53634E] flex items-center justify-center font-bold text-xs shrink-0">
+                        ✓
+                      </span>
+                      <span>{idea}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Dải xem các bạn nhỏ khác trong tiệm */}
+          <div className="pt-2 border-t border-[#987456]/15">
+            <span className="text-[11px] font-bold text-[#987456] block mb-2 uppercase tracking-wide">
+              Các bạn nhỏ khác trong tiệm:
+            </span>
+            <div className="flex gap-2.5 overflow-x-auto no-scrollbar py-1">
+              {PRODUCTS.map((p) => {
+                const isMatch = p.id === currentProduct.id;
+                return (
+                  <button
+                    key={p.id}
+                    onClick={() => handleSelectProduct(p)}
+                    title={p.name}
+                    className={`relative w-14 h-14 sm:w-16 sm:h-16 shrink-0 rounded-2xl overflow-hidden border-2 transition-all cursor-pointer ${
+                      isMatch
+                        ? 'border-[#7A8B70] ring-2 ring-[#7A8B70]/30 shadow-xs scale-105'
+                        : 'border-[#987456]/20 opacity-70 hover:opacity-100 hover:border-[#7A8B70]/50'
+                    }`}
+                  >
+                    <img
+                      src={p.image}
+                      alt={p.name}
+                      className="w-full h-full object-cover"
+                      referrerPolicy="no-referrer"
+                    />
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
