@@ -101,36 +101,6 @@ npm run dev
 # 3. Biên dịch cho môi trường production
 npm run build
 ```
-
----
-
-## ☁️ Hướng dẫn Deploy lên Vercel
-
-Dự án đã được tạo sẵn file cấu hình `vercel.json` để hỗ trợ SPA Routing.
-
-### Cách 1: Deploy qua Vercel Dashboard (Khuyên dùng)
-1. Đẩy mã nguồn lên kho lưu trữ **GitHub**, **GitLab** hoặc **Bitbucket**.
-2. Đăng nhập vào [vercel.com](https://vercel.com) và chọn **"Add New..."** → **"Project"**.
-3. Import kho lưu trữ chứa dự án này.
-4. Cấu hình dự án (Vercel tự động nhận diện Vite):
-   - **Framework Preset:** `Vite`
-   - **Build Command:** `npm run build`
-   - **Output Directory:** `dist`
-   - **Install Command:** `npm install`
-5. Nhấn **"Deploy"**. Quá trình build sẽ hoàn tất trong chưa đầy 1 phút!
-
-### Cách 2: Deploy qua Vercel CLI
-```bash
-# Cài đặt Vercel CLI (nếu chưa có)
-npm i -g vercel
-
-# Đăng nhập và deploy lên môi trường xem trước
-vercel
-
-# Deploy trực tiếp lên Production
-vercel --prod
-```
-
 ---
 
 *Một Chút Nắng — Được tạo nên bằng tình yêu dành cho những điều nhỏ bé và dịu dàng.* ☀️🌱
